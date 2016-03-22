@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>featureTracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
+  <link href="app.css" rel="stylesheet">
+  <script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.js"></script>
+  <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.min.js"></script>
+  <script src="https://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
+  <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-fixed-top" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <img src="/logo.png" alt="" class="left">
+        <h1 class="left">featureTracker</h1>
+      </div>
+  </nav>
+  <div id="main" class="container">
+    <!-- ko foreach: featureRequests -->
+    <div class="row" id="feature-requests">
+      <div class="col-lg-12">
+        <span data-bind="visible: done" class="label label-success">Closed</span>
+        <span data-bind="visible: !done()" class="label label-important">In Progress</span>
+        <p><b data-bind="text: title"></b></p>
+        <p data-bind="text: description"></p>
+        <span>Client: </span><span data-bind="text: clientName"></span></br>
+        <span>Priority: </span><span data-bind="text: clientPriority"></span></br>
+        <span>Target date: </span><span data-bind="text: targetDate"></span></br>
+        <span>Ticket URL: </span>
+        <a data-bind="text: ticketUrl"></a>
+        </br>
+        <span>Product area: </span><span data-bind="text: productArea"></span></br>
+        <span>Agent name: </span><span data-bind="text: agentName"></span></br>
+        <button data-bind="click: $parent.beginEdit" class="btn">Edit</button>
+        <span class="close-req-btn" data-bind="visible: !done()">
+        <button data-bind="click: $parent.markDone" class="btn">Close</button>
+        </span>
+      </div>
+    </div>
+    <!-- /ko -->
+    <!-- Footer -->
+    <div id="footer">
+      <div class="container">
+        <p>
+          <button data-bind="click: beginNew" class="btn btn btn-primary" id="new-feature-request">New Feature request</button>
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- Add feature request -->
+  <div id="new" class="modal hide fade" tabindex="1" role="dialog" aria-labelledby="new-request-btn" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="new-request-btn">Add Feature Request</h3>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="new-title">Title</label>
+          <div class="controls">
+            <input data-bind="value: title" type="text" id="new-title" placeholder="Eg. Add Google login" style="width: 150px;">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="new-description">Description</label>
+          <div class="controls">
+            <textarea class="form-control" rows="3" data-bind="value: description" type="text" id="new-description" placeholder="Eg. Client wants to be able to login using his GMail account restricted to the corporate domain" style="width: 250px;"></textarea>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="new-client-name">Client</label>
+          <div class="controls">
+            <select data-bind="value: clientName" class="form-control" id="new-client-name">
+              <option selected="selected">Client A</option>
+              <option>Client B</option>
+              <option>Client C</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="new-client-priority">Priority</label>
+          <div class="controls">
+            <input data-bind="value: clientPriority" type="number" min="1" id="new-client-priority" placeholder="1 highest, 2 lower, etc." style="width: 150px;">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="new-target-date">Target date</label>
+          <div class="controls">
+            <input data-bind="value: targetDate" type="text" id="new-target-date" placeholder="Pick a target date" style="width: 150px;">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="new-product-area">Product area</label>
+          <div class="controls">
+            <select data-bind="value: productArea" class="form-control" id="new-product-area">
+              <option selected="selected">Policies</option>
+              <option>Billing</option>
+              <option>Claims</option>
+              <option>Reports</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="new-agent-name">Agent</label>
+          <div class="controls">
+            <input data-bind="value: agentName" type="text" id="new-agent-name" placeholder="Eg. Agata Britonsdottir" style="width: 150px;">
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button id="save-new-feature-request" data-bind="click: newFeatureRequest" class="btn btn-primary">Save</button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+  </div>
+  <!-- Edit feature request -->
+  <div id="edit" class="modal hide fade" tabindex="1" role="dialog" aria-labelledby="edit-request-btn" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="edit-request-btn">Edit Feature Request</h3>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="edit-title">Title</label>
+          <div class="controls">
+            <input data-bind="value: title" type="text" id="edit-title" style="width: 150px;">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="edit-description">Description</label>
+          <div class="controls">
+            <textarea class="form-control" rows="3" data-bind="value: description" type="text" id="edit-description" style="width: 250px;"></textarea>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="edit-client-priority">Priority</label>
+          <div class="controls">
+            <input data-bind="value: clientPriority" type="number" min="1" id="edit-client-priority" style="width: 150px;">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="edit-target-date">Target date</label>
+          <div class="controls">
+            <input data-bind="value: targetDate" type="text" id="edit-target-date" style="width: 150px;">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="edit-product-area">Product area</label>
+          <div class="controls">
+            <select data-bind="value: productArea" class="form-control" id="edit-product-area">
+              <option selected="selected">Policies</option>
+              <option>Billing</option>
+              <option>Claims</option>
+              <option>Reports</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button id="save-edit-feature-request" data-bind="click: editFeatureRequest" class="btn btn-primary">Update</button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
